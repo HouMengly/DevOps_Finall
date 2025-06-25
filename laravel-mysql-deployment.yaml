@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel
+  template:
+    metadata:
+      labels:
+        app: laravel
+    spec:
+      containers:
+        - name: laravel-web
+          image: houmengly/laravel-custom:latest 
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              apt-get update && \
+              apt-get install -y nginx openssh-server git unzip zip curl libzip-dev libpng-dev libonig-dev && \
+              docker-php-ext-install zip pdo pdo_mysql && \
+              service nginx start && \
+              service ssh start && \
+              tail -f /dev/null
+          ports:
+            - containerPort: 8080  # For Laravel site
+            - containerPort: 22    # For SSH
+          volumeMounts:
+            - name: www-data
+              mountPath: /var/www/html
+
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "Hello@123"
+            - name: MYSQL_DATABASE
+              value: "mengly-db"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+
+      volumes:
+        - name: mysql-data
+          emptyDir: {}
+        - name: www-data
+          emptyDir: {}
