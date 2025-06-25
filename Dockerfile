@@ -40,4 +40,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Expose ports
 EXPOSE 8080
 
+
 ENTRYPOINT ["entrypoint.sh"]
